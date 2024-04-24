@@ -28,17 +28,19 @@ document.addEventListener('DOMContentLoaded', () => {
         return date.toLocaleDateString('en-GB', options);
     }
 
-    function displayAllTask() {
+    function displayAllTask(task = existingTask) {
 
-        if(existingTask.length === 0) {
+        if(task.length === 0) {
+            taskWrapperEmpty.className = 'flex justify-center items-center h-[420px] mx-auto'
             taskWrapper.className = 'hidden'
             console.log('tidak ada task tersedia')
         } else {
+            taskWrapper.innerHTML = ''
             taskWrapperEmpty.className = 'hidden'
             console.log('task tersedia')
             
             // sort data
-            existingTask.forEach(tasks => {
+            task.forEach(tasks => {
                 const itemTask = document.createElement('div')
                 itemTask.className = "flex justify-between bg-white p-5 w-full rounded-3xl"
                 itemTask.innerHTML = `
@@ -72,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                             stroke="currentColor" stroke-width="2" stroke-miterlimit="10"
                                             stroke-linecap="round" stroke-linejoin="round" />
                                     </svg>
-                                </div>
+                                </div>\
                                 <p>In Progress</p>
                             </div>`
                          : 
@@ -94,18 +96,41 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
                 <div class="flex flex-row items-center gap-x-3">
-                    <a href="#"
+                    <a href="#" id="deleteTask-${tasks.id}"
                         class="my-auto font-semibold text-taskia-red border border-taskia-red p-[12px_20px] h-12 rounded-full">Delete</a>
-                    <a href="#" id="completedTask-${tasks.id}"
-                        class="flex gap-[10px] justify-center items-center text-white p-[12px_20px] h-12 font-semibold bg-gradient-to-b from-[#977FFF] to-[#6F4FFF] rounded-full w-full border border-taskia-background-grey">Complete</a>
+                    ${tasks.isCompleted == false ?
+                    `<a href="#" id="completedTask-${tasks.id}"
+                        class="flex gap-[10px] justify-center items-center text-white p-[12px_20px] h-12 font-semibold bg-gradient-to-b from-[#977FFF] to-[#6F4FFF] rounded-full w-full border border-taskia-background-grey">
+                        Complete
+                    </a>`
+                    : 
+                    `<a href="#" id="completedTask-${tasks.id}" class="hidden"></a>`
+                    } 
+                    
                 </div>`
 
                 taskWrapper.appendChild(itemTask)
                 
+                // btn complete
                 itemTask.querySelector(`#completedTask-${tasks.id}`).addEventListener('click', function(event){
                     event.preventDefault()
                     myTask.completeTask(tasks.id)
+
+                    // Update data terbaru
+                    const updateTasks = myTask.getTasks()
+                    displayAllTask(updateTasks)
                 })
+
+                // btn delete
+                itemTask.querySelector(`#deleteTask-${tasks.id}`).addEventListener('click', function(event){
+                    event.preventDefault()
+                    myTask.deleteTask(tasks.id)
+
+                    // update data terbaru
+                    const updateTasks = myTask.getTasks()
+                    displayAllTask(updateTasks)
+                })
+                
             });
         }
 
